@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/lovej/OneDrive/Desktop/Project - 2 Retail Sales/retail sales analysis.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2613"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="Orders Dataset" custom_title="0" dock_id="1" table="4,14:mainOrders Dataset"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011300ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="Order Dataset Data_Validation*">SELECT COUNT(*) AS total_rows
+FROM &quot;Orders Dataset&quot;;
+
+PRAGMA table_info(&quot;Orders Dataset&quot;);
+
+SELECT DISTINCT Discount
+FROM &quot;Orders Dataset&quot;
+ORDER BY Discount;</sql><sql name="Check_Null*">SELECT
+    COUNT(*) AS total_records,
+    COUNT(&quot;Order ID&quot;) AS order_id_count,
+    COUNT(&quot;Customer ID&quot;) AS customer_id_count,
+    COUNT(&quot;Sales&quot;) AS sales_count,
+    COUNT(&quot;Profit&quot;) AS profit_count
+FROM &quot;Orders Dataset&quot;;
+</sql><sql name="Check_Duplicates*">SELECT
+    &quot;Row ID&quot;,
+    COUNT(*) AS record_count
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Row ID&quot;
+HAVING COUNT(*) &gt; 1;</sql><sql name="Customer Analysis*">SELECT
+    &quot;Customer ID&quot;,
+    &quot;Customer Name&quot;,
+    COUNT(DISTINCT &quot;Order ID&quot;) AS total_orders
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Customer ID&quot;, &quot;Customer Name&quot;
+ORDER BY total_orders DESC
+LIMIT 10;
+
+SELECT
+    &quot;Customer ID&quot;,
+    &quot;Customer Name&quot;,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Customer ID&quot;, &quot;Customer Name&quot;
+ORDER BY total_profit DESC
+LIMIT 10;
+
+SELECT
+    &quot;Customer ID&quot;,
+    &quot;Customer Name&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Customer ID&quot;, &quot;Customer Name&quot;
+HAVING SUM(&quot;Profit&quot;) &lt; 0
+ORDER BY total_profit ASC;
+
+SELECT
+    &quot;Customer ID&quot;,
+    &quot;Customer Name&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Customer ID&quot;, &quot;Customer Name&quot;
+HAVING SUM(&quot;Sales&quot;) &gt; (
+    SELECT AVG(customer_sales)
+    FROM (
+        SELECT SUM(&quot;Sales&quot;) AS customer_sales
+        FROM &quot;Orders Dataset&quot;
+        GROUP BY &quot;Customer ID&quot;
+    )
+)
+AND SUM(&quot;Profit&quot;) &lt; 0
+ORDER BY total_sales DESC;</sql><sql name="Product Analysis*">SELECT
+    &quot;Product ID&quot;,
+    &quot;Product Name&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Product ID&quot;, &quot;Product Name&quot;
+ORDER BY total_sales DESC
+LIMIT 10;
+
+SELECT
+    &quot;Product ID&quot;,
+    &quot;Product Name&quot;,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Product ID&quot;, &quot;Product Name&quot;
+ORDER BY total_profit DESC
+LIMIT 10;
+
+SELECT
+    &quot;Product ID&quot;,
+    &quot;Product Name&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Product ID&quot;, &quot;Product Name&quot;
+HAVING SUM(&quot;Profit&quot;) &lt; 0
+ORDER BY total_profit ASC;
+
+SELECT
+    &quot;Product ID&quot;,
+    &quot;Product Name&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Product ID&quot;, &quot;Product Name&quot;
+HAVING SUM(&quot;Sales&quot;) &gt; (
+    SELECT AVG(product_sales)
+    FROM (
+        SELECT SUM(&quot;Sales&quot;) AS product_sales
+        FROM &quot;Orders Dataset&quot;
+        GROUP BY &quot;Product ID&quot;
+    )
+)
+AND SUM(&quot;Profit&quot;) &lt; 0
+ORDER BY total_sales DESC;</sql><sql name="Business Analysis*">SELECT
+    &quot;Order ID&quot;,
+    &quot;Product Name&quot;,
+    &quot;Sales&quot;,
+    &quot;Profit&quot;,
+    CASE
+        WHEN &quot;Profit&quot; &gt; 0 THEN 'Profitable'
+        WHEN &quot;Profit&quot; &lt; 0 THEN 'Loss'
+        ELSE 'Break-even'
+    END AS profit_status
+FROM &quot;Orders Dataset&quot;
+LIMIT 20;
+
+SELECT
+    CASE
+        WHEN &quot;Profit&quot; &gt; 0 THEN 'Profitable'
+        WHEN &quot;Profit&quot; &lt; 0 THEN 'Loss'
+        ELSE 'Break-even'
+    END AS profit_status,
+    COUNT(*) AS transaction_count
+FROM &quot;Orders Dataset&quot;
+GROUP BY profit_status
+ORDER BY transaction_count DESC;
+
+SELECT
+    &quot;Order ID&quot;,
+    &quot;Product Name&quot;,
+    &quot;Discount&quot;,
+    &quot;Sales&quot;,
+    &quot;Profit&quot;
+FROM &quot;Orders Dataset&quot;
+WHERE &quot;Discount&quot; &gt;= 0.30
+  AND &quot;Profit&quot; &lt; 0
+ORDER BY &quot;Discount&quot; DESC, &quot;Profit&quot; ASC;</sql><sql name="Regional &amp; Category Analysis*">SELECT
+    &quot;Region&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit,
+    SUM(&quot;Quantity&quot;) AS total_quantity
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Region&quot;
+ORDER BY total_profit DESC;
+
+SELECT
+    &quot;Category&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit,
+    SUM(&quot;Quantity&quot;) AS total_quantity
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Category&quot;
+ORDER BY total_profit DESC;
+
+SELECT
+    &quot;Region&quot;,
+    &quot;Category&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Region&quot;, &quot;Category&quot;
+HAVING SUM(&quot;Profit&quot;) &lt; 0
+ORDER BY total_profit ASC;
+
+SELECT
+    &quot;Region&quot;,
+    ROUND(SUM(&quot;Sales&quot;), 2) AS total_sales,
+    ROUND(SUM(&quot;Profit&quot;), 2) AS total_profit,
+    ROUND(
+        (SUM(&quot;Profit&quot;) / SUM(&quot;Sales&quot;)) * 100,
+        2
+    ) AS profit_margin
+FROM &quot;Orders Dataset&quot;
+GROUP BY &quot;Region&quot;
+ORDER BY profit_margin DESC;</sql><sql name="Return dataset Data Validation*">SELECT COUNT(*) AS total_returns
+FROM &quot;Returns Dataset&quot;;</sql><sql name="Returned Orders*">SELECT
+    o.&quot;Order ID&quot;,
+    o.&quot;Customer Name&quot;,
+    o.&quot;Category&quot;,
+    o.&quot;Sales&quot;,
+    o.&quot;Profit&quot;
+FROM &quot;Orders Dataset&quot; o
+INNER JOIN &quot;Returns Dataset&quot; r
+    ON o.&quot;Order ID&quot; = r.&quot;Order ID&quot;;</sql><sql name="Returned Orders by Category*">SELECT
+    o.&quot;Category&quot;,
+    COUNT(DISTINCT o.&quot;Order ID&quot;) AS returned_orders
+FROM &quot;Orders Dataset&quot; o
+INNER JOIN &quot;Returns Dataset&quot; r
+    ON o.&quot;Order ID&quot; = r.&quot;Order ID&quot;
+GROUP BY o.&quot;Category&quot;
+ORDER BY returned_orders DESC;</sql><sql name="Returned Orders by Region*">SELECT
+    o.&quot;Region&quot;,
+    COUNT(DISTINCT o.&quot;Order ID&quot;) AS returned_orders
+FROM &quot;Orders Dataset&quot; o
+INNER JOIN &quot;Returns Dataset&quot; r
+    ON o.&quot;Order ID&quot; = r.&quot;Order ID&quot;
+GROUP BY o.&quot;Region&quot;
+ORDER BY returned_orders DESC;</sql><sql name="Customers With Returned Orders*">SELECT
+    o.&quot;Customer ID&quot;,
+    o.&quot;Customer Name&quot;,
+    COUNT(DISTINCT o.&quot;Order ID&quot;) AS returned_orders
+FROM &quot;Orders Dataset&quot; o
+INNER JOIN &quot;Returns Dataset&quot; r
+    ON o.&quot;Order ID&quot; = r.&quot;Order ID&quot;
+GROUP BY o.&quot;Customer ID&quot;, o.&quot;Customer Name&quot;
+ORDER BY returned_orders DESC
+LIMIT 10;</sql><current_tab id="0"/></tab_sql></sqlb_project>
